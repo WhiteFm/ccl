@@ -1,4 +1,4 @@
-# WSGuild Character Vault
+# WSGuild Character Creation List (CCL)
 
 Статическое React-приложение конструктора и менеджера персонажей D&D 5.5e.
 

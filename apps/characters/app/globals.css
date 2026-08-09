@@ -152,16 +152,8 @@ img {
 }
 
 .brand-mark {
-  align-items: center;
-  background: linear-gradient(145deg, var(--blue-2), var(--blue-5));
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: var(--night);
-  display: inline-flex;
-  font-family: var(--font-forum), serif;
-  font-size: 1.55rem;
   height: 44px;
-  justify-content: center;
-  line-height: 1;
+  object-fit: contain;
   width: 44px;
 }
 

@@ -10,7 +10,7 @@ type Locale = "ru" | "en";
 type View = "auth" | "dashboard" | "builder" | "manager";
 type TabId = "basic" | "class" | "background" | "abilities" | "equipment" | "spells" | "features";
 type ManagerTab = "overview" | "skills" | "equipment" | "spells" | "details";
-type ClassId = "fighter" | "wizard" | "rogue" | "ranger";
+type ClassId = string;
 type Copy = typeof ru;
 
 interface CharacterSlot {
@@ -25,12 +25,12 @@ interface CharacterSlot {
 interface Draft {
   name: string;
   avatar?: string;
-  species: "human" | "elf" | "dwarf";
-  alignment: "neutralGood" | "lawfulGood" | "chaoticNeutral";
+  species: string;
+  alignment: string;
   languages: string[];
   description: string;
-  classId: Exclude<ClassId, "ranger">;
-  backgroundId: "artisan" | "acolyte" | "criminal";
+  classId: string;
+  backgroundId: string;
   abilityMethod: "point_buy" | "dice";
   scores: AbilityScores;
   equipment: string[];
@@ -49,35 +49,25 @@ const TAB_KEYS: Record<TabId, keyof Copy> = {
   features: "tabFeatures"
 };
 const STORAGE = {
-  locale: "ccl2.locale",
-  session: "ccl2.demo-session",
-  slots: "ccl2.character-slots",
-  draft: "ccl2.character-draft"
+  locale: "ccl.locale",
+  session: "ccl.session",
+  slots: "ccl.character-slots",
+  draft: "ccl.character-draft"
 };
 const INITIAL_DRAFT: Draft = {
   name: "",
-  species: "human",
-  alignment: "neutralGood",
-  languages: ["common"],
+  species: "",
+  alignment: "",
+  languages: [],
   description: "",
-  classId: "fighter",
-  backgroundId: "artisan",
+  classId: "",
+  backgroundId: "",
   abilityMethod: "point_buy",
   scores: { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 },
-  equipment: ["weapon", "armor", "pack"],
+  equipment: [],
   spells: []
 };
-const INITIAL_SLOTS: Array<CharacterSlot | null> = [
-  {
-    id: "sample",
-    name: "Аэлин Ночной Ветер",
-    classId: "ranger",
-    level: 1,
-    description: "Следопыт, который ищет следы исчезнувшей экспедиции."
-  },
-  null,
-  null
-];
+const INITIAL_SLOTS: Array<CharacterSlot | null> = [null, null, null];
 
 function loadInitialState() {
   const fallback = {
@@ -111,7 +101,7 @@ function cx(...names: Array<string | false | null | undefined>) {
 }
 
 function BrandMark() {
-  return <span className="brand-mark" aria-hidden="true">W</span>;
+  return <img className="brand-mark" src="/ccl-logo.svg" alt="CCL" />;
 }
 
 function LanguageSwitch({ locale, onChange }: { locale: Locale; onChange: (locale: Locale) => void }) {
@@ -172,7 +162,7 @@ export default function CharacterApp() {
 
   const pointBuy = useMemo(() => validatePointBuy(draft.scores), [draft.scores]);
   const abilitiesReady = draft.abilityMethod === "point_buy" ? pointBuy.valid : Object.keys(assignments).length === 6;
-  const completion = Math.round(([draft.name.trim(), draft.species, draft.classId, draft.backgroundId, abilitiesReady].filter(Boolean).length / 5) * 100);
+  const completion = Math.round(([draft.name.trim(), abilitiesReady].filter(Boolean).length / 2) * 100);
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -264,7 +254,7 @@ export default function CharacterApp() {
     else setActiveTab(TAB_IDS[index + 1]);
   }
 
-  const className = (id: ClassId) => id === "ranger" ? copy.sampleClass : String(copy[id]);
+  const className = (id: ClassId) => id || "—";
 
   if (!authenticated || view === "auth") {
     return (
@@ -349,7 +339,7 @@ export default function CharacterApp() {
         </section>
         <nav className="page-width manager-tabs">{managerTabs.map((tab) => <button className={managerTab === tab ? "active" : ""} key={tab} onClick={() => setManagerTab(tab)} type="button">{copy[tab]}</button>)}</nav>
         <section className="page-width manager-content">
-          {managerTab === "overview" ? <div className="stat-grid">{[[copy.armorClass, "15"], [copy.hitPoints, "12"], [copy.initiative, "+2"], [copy.speed, "30 ft"], [copy.proficiency, "+2"]].map(([label, value]) => <article key={label}><span>{label}</span><strong>{value}</strong></article>)}</div> : <div className="placeholder"><p className="eyebrow">{copy[managerTab]}</p><h2>{copy[managerTab]}</h2><p>{copy.managerNote}</p></div>}
+          <div className="placeholder"><p className="eyebrow">{copy[managerTab]}</p><h2>{copy[managerTab]}</h2><p>{copy.managerNote}</p></div>
         </section>
       </main>
     );
@@ -381,7 +371,6 @@ export default function CharacterApp() {
 
   function renderTab() {
     if (activeTab === "basic") {
-      const toggleLanguage = (language: string) => update("languages", draft.languages.includes(language) ? draft.languages.filter((item) => item !== language) : [...draft.languages, language]);
       return (
         <>
           <SectionIntro number="01" title={copy.basicTitle} lead={copy.basicLead} />
@@ -392,24 +381,12 @@ export default function CharacterApp() {
             </div>
             <div className="form-grid">
               <label className="field wide"><span>{copy.name}</span><input onChange={(event) => update("name", event.target.value)} placeholder={copy.namePlaceholder} value={draft.name} /></label>
-              <label className="field"><span>{copy.species}</span><select onChange={(event) => update("species", event.target.value as Draft["species"])} value={draft.species}><option value="human">{copy.human}</option><option value="elf">{copy.elf}</option><option value="dwarf">{copy.dwarf}</option></select></label>
-              <label className="field"><span>{copy.alignment}</span><select onChange={(event) => update("alignment", event.target.value as Draft["alignment"])} value={draft.alignment}><option value="neutralGood">{copy.neutralGood}</option><option value="lawfulGood">{copy.lawfulGood}</option><option value="chaoticNeutral">{copy.chaoticNeutral}</option></select></label>
-              <fieldset className="field wide checks"><legend>{copy.languages}</legend>{(["common", "elvish", "dwarvish"] as const).map((language) => <label key={language}><input checked={draft.languages.includes(language)} onChange={() => toggleLanguage(language)} type="checkbox" /><span>{copy[language]}</span></label>)}</fieldset>
               <label className="field wide"><span>{copy.description}</span><textarea onChange={(event) => update("description", event.target.value)} placeholder={copy.descriptionPlaceholder} rows={5} value={draft.description} /></label>
+              <div className="notice field wide"><span>!</span><div><strong>{copy.product}</strong><p>{copy.contentMissing}</p></div></div>
             </div>
           </div>
         </>
       );
-    }
-
-    if (activeTab === "class") {
-      const classes = [{ id: "fighter", glyph: "⚔", die: "d10" }, { id: "wizard", glyph: "✦", die: "d6" }, { id: "rogue", glyph: "◇", die: "d8" }] as const;
-      return <><SectionIntro number="02" title={copy.classTitle} lead={copy.classLead} /><div className="choice-grid">{classes.map((item) => <button className={cx("choice-card", draft.classId === item.id && "selected")} key={item.id} onClick={() => update("classId", item.id)} type="button"><b>{item.glyph}</b><span><strong>{copy[item.id]}</strong><small>{copy[(item.id + "Note") as "fighterNote" | "wizardNote" | "rogueNote"]}</small></span><em>{item.die}</em></button>)}</div></>;
-    }
-
-    if (activeTab === "background") {
-      const backgrounds = ["artisan", "acolyte", "criminal"] as const;
-      return <><SectionIntro number="03" title={copy.backgroundTitle} lead={copy.backgroundLead} /><div className="choice-grid">{backgrounds.map((id) => <button className={cx("choice-card", draft.backgroundId === id && "selected")} key={id} onClick={() => update("backgroundId", id)} type="button"><b>{id === "artisan" ? "⌘" : id === "acolyte" ? "✧" : "◈"}</b><span><strong>{copy[id]}</strong><small>+2 / +1 · skill · tool</small></span></button>)}</div><div className="notice"><span>!</span><div><strong>{copy.duplicateTitle}</strong><p>{copy.duplicateLead}</p></div></div></>;
     }
 
     if (activeTab === "abilities") {
@@ -426,17 +403,14 @@ export default function CharacterApp() {
       );
     }
 
-    if (activeTab === "equipment") {
-      const items = ["weapon", "armor", "pack", "tools"] as const;
-      return <><SectionIntro number="05" title={copy.equipmentTitle} lead={copy.equipmentLead} /><div className="check-list">{items.map((item) => <label key={item}><input checked={draft.equipment.includes(item)} onChange={() => update("equipment", draft.equipment.includes(item) ? draft.equipment.filter((value) => value !== item) : [...draft.equipment, item])} type="checkbox" /><span>✓</span><strong>{copy[item]}</strong><small>structured:item.{item}</small></label>)}</div></>;
-    }
-
-    if (activeTab === "spells") {
-      const spells = ["Mage Hand", "Light", "Magic Missile", "Shield"];
-      return <><SectionIntro number="06" title={copy.spellsTitle} lead={copy.spellsLead} />{draft.classId !== "wizard" ? <div className="empty-state"><span>✦</span><p>{copy.notCaster}</p></div> : <><p>{copy.chooseSpells}</p><div className="spell-grid">{spells.map((spell) => <label aria-label={spell} htmlFor={`spell-${spell}`} key={spell}><input id={`spell-${spell}`} checked={draft.spells.includes(spell)} onChange={() => update("spells", draft.spells.includes(spell) ? draft.spells.filter((item) => item !== spell) : [...draft.spells, spell])} type="checkbox" /><span><strong>{spell}</strong><small>structured:spell</small></span></label>)}</div></>}</>;
-    }
-
-    const features = [[copy.always, "Fighting Style"], [copy.passive, copy.artisan], [copy.active, "Second Wind"]];
-    return <><SectionIntro number="07" title={copy.featuresTitle} lead={copy.featuresLead} /><div className="feature-cards">{features.map(([type, title], index) => <article key={type}><span className={"type type-" + index}>{type}</span><h3>{title}</h3><p>{index === 0 ? "always_on" : index === 1 ? "manual_unlimited" : "limited_use"}</p></article>)}</div></>;
+    const emptyTitles = {
+      class: ["02", copy.classTitle, copy.classLead],
+      background: ["03", copy.backgroundTitle, copy.backgroundLead],
+      equipment: ["05", copy.equipmentTitle, copy.equipmentLead],
+      spells: ["06", copy.spellsTitle, copy.spellsLead],
+      features: ["07", copy.featuresTitle, copy.featuresLead]
+    } as const;
+    const [number, title, lead] = emptyTitles[activeTab as keyof typeof emptyTitles];
+    return <><SectionIntro number={number} title={title} lead={lead} /><div className="empty-state"><span>◇</span><p>{copy.contentMissing}</p></div></>;
   }
 }
