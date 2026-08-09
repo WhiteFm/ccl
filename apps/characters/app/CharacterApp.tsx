@@ -71,7 +71,7 @@ const INITIAL_SLOTS: Array<CharacterSlot | null> = [null, null, null];
 
 function loadInitialState() {
   const fallback = {
-    locale: "ru" as Locale,
+    locale: "en" as Locale,
     authenticated: false,
     view: "auth" as View,
     slots: INITIAL_SLOTS,
@@ -107,9 +107,9 @@ function BrandMark() {
 function LanguageSwitch({ locale, onChange }: { locale: Locale; onChange: (locale: Locale) => void }) {
   return (
     <div className="language-switch" aria-label="Language">
-      <button className={locale === "ru" ? "active" : ""} onClick={() => onChange("ru")} type="button">RU</button>
-      <span>/</span>
       <button className={locale === "en" ? "active" : ""} onClick={() => onChange("en")} type="button">EN</button>
+      <span>/</span>
+      <button className={locale === "ru" ? "active" : ""} onClick={() => onChange("ru")} type="button">RU</button>
     </div>
   );
 }
