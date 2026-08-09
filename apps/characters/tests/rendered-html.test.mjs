@@ -1,24 +1,15 @@
 import assert from "node:assert/strict";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-  return worker.fetch(
-    new Request("http://localhost/", { headers: { accept: "text/html" } }),
-    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
-    { waitUntil() {}, passThroughOnException() {} }
-  );
-}
+test("builds a static GitHub Pages application", async () => {
+  const html = await readFile(new URL("../dist/index.html", import.meta.url), "utf8");
+  const assets = await readdir(new URL("../dist/assets/", import.meta.url));
 
-test("server-renders the WSGuild character site", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-  const html = await response.text();
   assert.match(html, /<title>WSGuild — Character Vault<\/title>/i);
-  assert.match(html, /WSGuild/);
-  assert.match(html, /CharacterApp-[A-Za-z0-9_-]+\.js/);
-  assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
+  assert.match(html, /<div id="root"><\/div>/i);
+  assert.match(html, /src="\/assets\/[^"]+\.js"/i);
+  assert.ok(assets.some((file) => file.endsWith(".js")));
+  assert.ok(assets.some((file) => file.endsWith(".css")));
+  assert.doesNotMatch(html, /chatgpt\.site|codex-preview/i);
 });

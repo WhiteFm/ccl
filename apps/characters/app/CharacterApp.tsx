@@ -79,6 +79,33 @@ const INITIAL_SLOTS: Array<CharacterSlot | null> = [
   null
 ];
 
+function loadInitialState() {
+  const fallback = {
+    locale: "ru" as Locale,
+    authenticated: false,
+    view: "auth" as View,
+    slots: INITIAL_SLOTS,
+    draft: INITIAL_DRAFT,
+  };
+
+  try {
+    const savedLocale = localStorage.getItem(STORAGE.locale);
+    const authenticated = localStorage.getItem(STORAGE.session) === "true";
+    const savedSlots = localStorage.getItem(STORAGE.slots);
+    const savedDraft = localStorage.getItem(STORAGE.draft);
+
+    return {
+      locale: savedLocale === "ru" || savedLocale === "en" ? savedLocale : fallback.locale,
+      authenticated,
+      view: authenticated ? "dashboard" as View : fallback.view,
+      slots: savedSlots ? JSON.parse(savedSlots) as Array<CharacterSlot | null> : fallback.slots,
+      draft: savedDraft ? JSON.parse(savedDraft) as Draft : fallback.draft,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
 function cx(...names: Array<string | false | null | undefined>) {
   return names.filter(Boolean).join(" ");
 }
@@ -117,14 +144,14 @@ function SectionIntro({ number, title, lead }: { number: string; title: string; 
 }
 
 export default function CharacterApp() {
-  const [locale, setLocale] = useState<Locale>("ru");
-  const [view, setView] = useState<View>("auth");
+  const [initialState] = useState(loadInitialState);
+  const [locale, setLocale] = useState<Locale>(initialState.locale);
+  const [view, setView] = useState<View>(initialState.view);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
-  const [authenticated, setAuthenticated] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
-  const [slots, setSlots] = useState<Array<CharacterSlot | null>>(INITIAL_SLOTS);
+  const [authenticated, setAuthenticated] = useState(initialState.authenticated);
+  const [slots, setSlots] = useState<Array<CharacterSlot | null>>(initialState.slots);
   const [slotIndex, setSlotIndex] = useState(0);
-  const [draft, setDraft] = useState<Draft>(INITIAL_DRAFT);
+  const [draft, setDraft] = useState<Draft>(initialState.draft);
   const [activeTab, setActiveTab] = useState<TabId>("basic");
   const [managerTab, setManagerTab] = useState<ManagerTab>("overview");
   const [rolls, setRolls] = useState<number[]>([]);
@@ -134,34 +161,14 @@ export default function CharacterApp() {
   const copy = (locale === "ru" ? ru : en) as Copy;
 
   useEffect(() => {
-    try {
-      const savedLocale = localStorage.getItem(STORAGE.locale);
-      if (savedLocale === "ru" || savedLocale === "en") setLocale(savedLocale);
-      const hasSession = localStorage.getItem(STORAGE.session) === "true";
-      setAuthenticated(hasSession);
-      if (hasSession) setView("dashboard");
-      const savedSlots = localStorage.getItem(STORAGE.slots);
-      const savedDraft = localStorage.getItem(STORAGE.draft);
-      if (savedSlots) setSlots(JSON.parse(savedSlots));
-      if (savedDraft) setDraft(JSON.parse(savedDraft));
-    } catch {
-      setSlots(INITIAL_SLOTS);
-      setDraft(INITIAL_DRAFT);
-    } finally {
-      setHydrated(true);
-    }
-  }, []);
-
-  useEffect(() => {
     document.documentElement.lang = locale;
-    if (hydrated) localStorage.setItem(STORAGE.locale, locale);
-  }, [hydrated, locale]);
+    localStorage.setItem(STORAGE.locale, locale);
+  }, [locale]);
 
   useEffect(() => {
-    if (!hydrated) return;
     localStorage.setItem(STORAGE.slots, JSON.stringify(slots));
     localStorage.setItem(STORAGE.draft, JSON.stringify(draft));
-  }, [draft, hydrated, slots]);
+  }, [draft, slots]);
 
   const pointBuy = useMemo(() => validatePointBuy(draft.scores), [draft.scores]);
   const abilitiesReady = draft.abilityMethod === "point_buy" ? pointBuy.valid : Object.keys(assignments).length === 6;
@@ -258,8 +265,6 @@ export default function CharacterApp() {
   }
 
   const className = (id: ClassId) => id === "ranger" ? copy.sampleClass : String(copy[id]);
-
-  if (!hydrated) return <div className="app-loading"><BrandMark /></div>;
 
   if (!authenticated || view === "auth") {
     return (
@@ -428,7 +433,7 @@ export default function CharacterApp() {
 
     if (activeTab === "spells") {
       const spells = ["Mage Hand", "Light", "Magic Missile", "Shield"];
-      return <><SectionIntro number="06" title={copy.spellsTitle} lead={copy.spellsLead} />{draft.classId !== "wizard" ? <div className="empty-state"><span>✦</span><p>{copy.notCaster}</p></div> : <><p>{copy.chooseSpells}</p><div className="spell-grid">{spells.map((spell) => <label key={spell}><input checked={draft.spells.includes(spell)} onChange={() => update("spells", draft.spells.includes(spell) ? draft.spells.filter((item) => item !== spell) : [...draft.spells, spell])} type="checkbox" /><span><strong>{spell}</strong><small>structured:spell</small></span></label>)}</div></>}</>;
+      return <><SectionIntro number="06" title={copy.spellsTitle} lead={copy.spellsLead} />{draft.classId !== "wizard" ? <div className="empty-state"><span>✦</span><p>{copy.notCaster}</p></div> : <><p>{copy.chooseSpells}</p><div className="spell-grid">{spells.map((spell) => <label aria-label={spell} htmlFor={`spell-${spell}`} key={spell}><input id={`spell-${spell}`} checked={draft.spells.includes(spell)} onChange={() => update("spells", draft.spells.includes(spell) ? draft.spells.filter((item) => item !== spell) : [...draft.spells, spell])} type="checkbox" /><span><strong>{spell}</strong><small>structured:spell</small></span></label>)}</div></>}</>;
     }
 
     const features = [[copy.always, "Fighting Style"], [copy.passive, copy.artisan], [copy.active, "Second Wind"]];

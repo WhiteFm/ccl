@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 :root {
+  --font-forum: "Forum";
+  --font-cormorant: "Cormorant Garamond";
+  --font-alegreya: "Alegreya";
+  --font-literata: "Literata";
   --ink: #eef3f9;
   --muted: #9fb0c6;
   --faint: #6f829a;
