@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.wsguild.net/ccl2/character.schema.json",
+  "title": "CCL2 Character",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "characterId", "ownerId", "revision", "status", "identity", "contentManifest", "build", "runtimeState"],
+  "properties": {
+    "schemaVersion": { "$ref": "./common.schema.json#/$defs/semver" },
+    "characterId": { "type": "string", "minLength": 8, "maxLength": 160 },
+    "ownerId": { "type": "string", "minLength": 8, "maxLength": 160 },
+    "revision": { "type": "integer", "minimum": 0 },
+    "status": { "enum": ["draft", "active", "archived"] },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description"],
+      "properties": {
+        "name": { "type": "string", "maxLength": 240 },
+        "description": { "type": "string", "maxLength": 50000 },
+        "avatarAssetId": { "type": "string", "maxLength": 240 }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "alignmentId": { "$ref": "./common.schema.json#/$defs/identifier" },
+        "languageIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+        }
+      }
+    },
+    "contentManifest": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["packId", "version"],
+        "properties": {
+          "packId": { "$ref": "./common.schema.json#/$defs/identifier" },
+          "version": { "$ref": "./common.schema.json#/$defs/semver" },
+          "checksum": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["abilityGeneration", "levelHistory", "choices"],
+      "properties": {
+        "speciesId": { "$ref": "./common.schema.json#/$defs/identifier" },
+        "backgroundId": { "$ref": "./common.schema.json#/$defs/identifier" },
+        "abilityGeneration": {
+          "oneOf": [
+            { "$ref": "#/$defs/pointBuyGeneration" },
+            { "$ref": "#/$defs/rolledGeneration" }
+          ]
+        },
+        "backgroundAbilityBonuses": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "str": { "type": "integer", "minimum": 0, "maximum": 2 },
+            "dex": { "type": "integer", "minimum": 0, "maximum": 2 },
+            "con": { "type": "integer", "minimum": 0, "maximum": 2 },
+            "int": { "type": "integer", "minimum": 0, "maximum": 2 },
+            "wis": { "type": "integer", "minimum": 0, "maximum": 2 },
+            "cha": { "type": "integer", "minimum": 0, "maximum": 2 }
+          }
+        },
+        "levelHistory": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["characterLevel", "classId"],
+            "properties": {
+              "characterLevel": { "type": "integer", "minimum": 1, "maximum": 20 },
+              "classId": { "$ref": "./common.schema.json#/$defs/identifier" },
+              "subclassId": { "$ref": "./common.schema.json#/$defs/identifier" },
+              "hpGain": { "type": "integer", "minimum": 1 },
+              "hitDieRoll": { "type": "integer", "minimum": 1, "maximum": 12 }
+            }
+          }
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["choiceId", "sourceId", "values"],
+            "properties": {
+              "choiceId": { "$ref": "./common.schema.json#/$defs/identifier" },
+              "sourceId": { "$ref": "./common.schema.json#/$defs/identifier" },
+              "values": { "type": "array", "items": {} }
+            }
+          }
+        }
+      }
+    },
+    "runtimeState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xp", "hp", "temporaryHp", "deathSaves", "resources", "conditions", "inventory", "spellbook"],
+      "properties": {
+        "xp": { "type": "integer", "minimum": 0 },
+        "hp": { "type": "integer", "minimum": 0 },
+        "temporaryHp": { "type": "integer", "minimum": 0 },
+        "deathSaves": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["successes", "failures"],
+          "properties": {
+            "successes": { "type": "integer", "minimum": 0, "maximum": 3 },
+            "failures": { "type": "integer", "minimum": 0, "maximum": 3 }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "conditions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+        },
+        "inventory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["instanceId", "itemId", "quantity"],
+            "properties": {
+              "instanceId": { "type": "string", "minLength": 8, "maxLength": 160 },
+              "itemId": { "$ref": "./common.schema.json#/$defs/identifier" },
+              "quantity": { "type": "integer", "minimum": 1 },
+              "equippedSlot": { "type": "string", "maxLength": 80 },
+              "attuned": { "type": "boolean" },
+              "chargesUsed": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "spellbook": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["known", "prepared", "slotsUsed"],
+          "properties": {
+            "known": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+            },
+            "prepared": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+            },
+            "slotsUsed": {
+              "type": "object",
+              "propertyNames": { "pattern": "^[1-9]$" },
+              "additionalProperties": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "derivedSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engineVersion", "computedAt", "values", "trace"],
+      "properties": {
+        "engineVersion": { "$ref": "./common.schema.json#/$defs/semver" },
+        "computedAt": { "$ref": "./common.schema.json#/$defs/isoDateTime" },
+        "values": { "type": "object" },
+        "trace": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "embeddedHomebrew": {
+      "type": "array",
+      "items": { "$ref": "./content-pack.schema.json" }
+    }
+  },
+  "$defs": {
+    "pointBuyGeneration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "budget", "scores"],
+      "properties": {
+        "method": { "const": "point_buy" },
+        "budget": { "const": 27 },
+        "scores": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["str", "dex", "con", "int", "wis", "cha"],
+          "properties": {
+            "str": { "type": "integer", "minimum": 8, "maximum": 15 },
+            "dex": { "type": "integer", "minimum": 8, "maximum": 15 },
+            "con": { "type": "integer", "minimum": 8, "maximum": 15 },
+            "int": { "type": "integer", "minimum": 8, "maximum": 15 },
+            "wis": { "type": "integer", "minimum": 8, "maximum": 15 },
+            "cha": { "type": "integer", "minimum": 8, "maximum": 15 }
+          }
+        }
+      }
+    },
+    "rolledGeneration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "rolls"],
+      "properties": {
+        "method": { "const": "rolled" },
+        "rolls": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "dice", "discardedIndex", "total", "assignedAbility"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1, "maxLength": 80 },
+              "dice": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+              },
+              "discardedIndex": { "type": "integer", "minimum": 0, "maximum": 3 },
+              "total": { "type": "integer", "minimum": 3, "maximum": 18 },
+              "assignedAbility": { "$ref": "./common.schema.json#/$defs/abilityId" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

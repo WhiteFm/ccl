@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.wsguild.net/ccl2/forge-project.schema.json",
+  "title": "CCL2 Forge Project",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "projectId", "savedAt", "draftPack", "editorState"],
+  "properties": {
+    "schemaVersion": { "$ref": "./common.schema.json#/$defs/semver" },
+    "projectId": { "type": "string", "minLength": 8, "maxLength": 160 },
+    "savedAt": { "$ref": "./common.schema.json#/$defs/isoDateTime" },
+    "draftPack": { "$ref": "./content-pack.schema.json" },
+    "editorState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["activeSection", "dirtyEntityIds"],
+      "properties": {
+        "activeSection": { "type": "string", "maxLength": 80 },
+        "activeEntityId": { "$ref": "./common.schema.json#/$defs/identifier" },
+        "activeLocale": { "$ref": "./common.schema.json#/$defs/locale" },
+        "dirtyEntityIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+        },
+        "validationAcknowledgements": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "maxLength": 240 }
+        }
+      }
+    },
+    "localAssetIndex": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "localKey", "mediaType"],
+        "properties": {
+          "id": { "$ref": "./common.schema.json#/$defs/identifier" },
+          "localKey": { "type": "string", "maxLength": 500 },
+          "mediaType": { "type": "string", "maxLength": 120 }
+        }
+      }
+    }
+  }
+}
+

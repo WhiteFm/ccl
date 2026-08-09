@@ -1,0 +1,469 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.wsguild.net/ccl2/content-entity.schema.json",
+  "title": "CCL2 Content Entity",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/referenceEntity" },
+    { "$ref": "#/$defs/speciesEntity" },
+    { "$ref": "#/$defs/classEntity" },
+    { "$ref": "#/$defs/subclassEntity" },
+    { "$ref": "#/$defs/backgroundEntity" },
+    { "$ref": "#/$defs/featEntity" },
+    { "$ref": "#/$defs/featureEntity" },
+    { "$ref": "#/$defs/spellEntity" },
+    { "$ref": "#/$defs/itemEntity" }
+  ],
+  "$defs": {
+    "commonProperties": {
+      "type": "object",
+      "required": ["id", "entityType", "rulesetId", "sourceId", "licenseId", "status"],
+      "properties": {
+        "id": { "$ref": "./common.schema.json#/$defs/identifier" },
+        "entityType": { "type": "string" },
+        "rulesetId": { "$ref": "./common.schema.json#/$defs/identifier" },
+        "sourceId": { "$ref": "./common.schema.json#/$defs/identifier" },
+        "sourceVersion": { "type": "string", "maxLength": 80 },
+        "licenseId": { "$ref": "./common.schema.json#/$defs/identifier" },
+        "status": { "$ref": "./common.schema.json#/$defs/contentStatus" },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "maxLength": 80 }
+        },
+        "deprecatedBy": { "$ref": "./common.schema.json#/$defs/identifier" }
+      }
+    },
+    "referenceEntity": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/commonProperties" },
+        {
+          "type": "object",
+          "required": ["entityType", "category", "value"],
+          "properties": {
+            "entityType": { "const": "reference" },
+            "category": {
+              "enum": [
+                "ability",
+                "skill",
+                "language",
+                "tool",
+                "damage_type",
+                "condition",
+                "sense",
+                "movement_type",
+                "size",
+                "rest_type",
+                "action_type",
+                "weapon_property",
+                "weapon_mastery",
+                "armor_training",
+                "spell_school"
+              ]
+            },
+            "value": { "type": "object" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "speciesEntity": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/commonProperties" },
+        {
+          "type": "object",
+          "required": ["entityType", "sizeOptions", "baseSpeeds", "featureIds"],
+          "properties": {
+            "entityType": { "const": "species" },
+            "sizeOptions": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+            },
+            "baseSpeeds": {
+              "type": "object",
+              "additionalProperties": { "type": "number", "minimum": 0 }
+            },
+            "featureIds": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+            },
+            "choices": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/choiceDefinition" }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "classEntity": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/commonProperties" },
+        {
+          "type": "object",
+          "required": ["entityType", "hitDie", "primaryAbilities", "levels", "startingProficiencies", "multiclassProficiencies"],
+          "properties": {
+            "entityType": { "const": "class" },
+            "hitDie": { "enum": ["d6", "d8", "d10", "d12"] },
+            "primaryAbilities": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "./common.schema.json#/$defs/abilityId" }
+            },
+            "multiclassPrerequisite": { "$ref": "./common.schema.json#/$defs/formula" },
+            "startingHpFormula": { "$ref": "./common.schema.json#/$defs/formula" },
+            "levelUpHpFormula": { "$ref": "./common.schema.json#/$defs/formula" },
+            "startingProficiencies": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+            },
+            "multiclassProficiencies": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+            },
+            "spellcastingAbility": { "$ref": "./common.schema.json#/$defs/abilityId" },
+            "casterProgression": { "enum": ["none", "full", "half_down", "half_up", "third", "pact", "custom"] },
+            "casterLevelFormula": { "$ref": "./common.schema.json#/$defs/formula" },
+            "levels": {
+              "type": "array",
+              "minItems": 20,
+              "maxItems": 20,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["level", "featureIds"],
+                "properties": {
+                  "level": { "type": "integer", "minimum": 1, "maximum": 20 },
+                  "featureIds": {
+                    "type": "array",
+                    "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "subclassEntity": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/commonProperties" },
+        {
+          "type": "object",
+          "required": ["entityType", "classId", "levels"],
+          "properties": {
+            "entityType": { "const": "subclass" },
+            "classId": { "$ref": "./common.schema.json#/$defs/identifier" },
+            "levels": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["classLevel", "featureIds"],
+                "properties": {
+                  "classLevel": { "type": "integer", "minimum": 1, "maximum": 20 },
+                  "featureIds": {
+                    "type": "array",
+                    "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "backgroundEntity": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/commonProperties" },
+        {
+          "type": "object",
+          "required": ["entityType", "abilityOptions", "featId", "proficiencyGrants", "equipmentOptions"],
+          "properties": {
+            "entityType": { "const": "background" },
+            "abilityOptions": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": { "$ref": "./common.schema.json#/$defs/abilityId" }
+            },
+            "featId": { "$ref": "./common.schema.json#/$defs/identifier" },
+            "proficiencyGrants": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+            },
+            "choices": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/choiceDefinition" }
+            },
+            "equipmentOptions": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "items", "currencyCp"],
+                "properties": {
+                  "id": { "$ref": "./common.schema.json#/$defs/identifier" },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["itemId", "quantity"],
+                      "properties": {
+                        "itemId": { "$ref": "./common.schema.json#/$defs/identifier" },
+                        "quantity": { "type": "integer", "minimum": 1 }
+                      }
+                    }
+                  },
+                  "currencyCp": { "type": "integer", "minimum": 0 }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "featEntity": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/commonProperties" },
+        {
+          "type": "object",
+          "required": ["entityType", "category", "repeatable", "featureIds"],
+          "properties": {
+            "entityType": { "const": "feat" },
+            "category": { "enum": ["origin", "general", "fighting_style", "epic_boon", "custom"] },
+            "repeatable": { "type": "boolean" },
+            "prerequisites": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/formula" }
+            },
+            "featureIds": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+            },
+            "choices": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/choiceDefinition" }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "featureEntity": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/commonProperties" },
+        {
+          "type": "object",
+          "required": ["entityType", "mode", "effects", "automationLevel"],
+          "properties": {
+            "entityType": { "const": "feature" },
+            "mode": { "enum": ["always_on", "manual_unlimited", "limited_use"] },
+            "activation": { "enum": ["none", "action", "bonus_action", "reaction", "free_action", "special"] },
+            "resource": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "maximumFormula", "recovery"],
+              "properties": {
+                "id": { "$ref": "./common.schema.json#/$defs/identifier" },
+                "maximumFormula": { "$ref": "./common.schema.json#/$defs/formula" },
+                "recovery": { "enum": ["short_rest", "long_rest", "both", "dawn", "manual", "never"] },
+                "recoveryFormula": { "$ref": "./common.schema.json#/$defs/formula" }
+              }
+            },
+            "prerequisites": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/formula" }
+            },
+            "choices": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/choiceDefinition" }
+            },
+            "effects": {
+              "type": "array",
+              "items": { "$ref": "./effect.schema.json" }
+            },
+            "automationLevel": { "enum": ["full", "partial", "manual"] }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "spellEntity": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/commonProperties" },
+        {
+          "type": "object",
+          "required": ["entityType", "level", "schoolId", "casting", "range", "duration", "components", "effects", "automationLevel"],
+          "properties": {
+            "entityType": { "const": "spell" },
+            "level": { "type": "integer", "minimum": 0, "maximum": 9 },
+            "schoolId": { "$ref": "./common.schema.json#/$defs/identifier" },
+            "casting": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["actionType", "value"],
+              "properties": {
+                "actionType": { "enum": ["action", "bonus_action", "reaction", "minute", "hour", "special"] },
+                "value": { "type": "integer", "minimum": 1 },
+                "reactionTrigger": { "type": "string", "maxLength": 500 }
+              }
+            },
+            "range": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type"],
+              "properties": {
+                "type": { "enum": ["self", "touch", "distance", "sight", "unlimited", "special"] },
+                "distanceFeet": { "type": "number", "minimum": 0 }
+              }
+            },
+            "area": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["shape", "sizeFeet"],
+              "properties": {
+                "shape": { "enum": ["cone", "cube", "cylinder", "emanation", "line", "sphere", "wall"] },
+                "sizeFeet": { "type": "number", "exclusiveMinimum": 0 }
+              }
+            },
+            "duration": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "concentration"],
+              "properties": {
+                "type": { "enum": ["instant", "rounds", "minutes", "hours", "days", "until_dispelled", "special"] },
+                "value": { "type": "integer", "minimum": 1 },
+                "concentration": { "type": "boolean" }
+              }
+            },
+            "components": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["verbal", "somatic", "material"],
+              "properties": {
+                "verbal": { "type": "boolean" },
+                "somatic": { "type": "boolean" },
+                "material": { "type": "boolean" },
+                "materialCostCp": { "type": "integer", "minimum": 0 },
+                "materialConsumed": { "type": "boolean" }
+              }
+            },
+            "ritual": { "type": "boolean" },
+            "attackType": { "enum": ["none", "melee_spell", "ranged_spell"] },
+            "savingThrowAbility": { "$ref": "./common.schema.json#/$defs/abilityId" },
+            "effects": {
+              "type": "array",
+              "items": { "$ref": "./effect.schema.json" }
+            },
+            "scaling": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "at", "value"],
+                "properties": {
+                  "type": { "enum": ["character_level", "spell_slot_level", "class_level"] },
+                  "at": { "type": "integer", "minimum": 1 },
+                  "value": { "oneOf": [{ "type": "number" }, { "$ref": "./common.schema.json#/$defs/diceExpression" }] }
+                }
+              }
+            },
+            "automationLevel": { "enum": ["full", "partial", "manual"] }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "itemEntity": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/commonProperties" },
+        {
+          "type": "object",
+          "required": ["entityType", "itemType", "weightLb", "costCp", "stackable", "effects"],
+          "properties": {
+            "entityType": { "const": "item" },
+            "itemType": { "enum": ["gear", "weapon", "armor", "shield", "tool", "consumable", "container", "wondrous", "currency", "custom"] },
+            "weightLb": { "type": "number", "minimum": 0 },
+            "costCp": { "type": "integer", "minimum": 0 },
+            "stackable": { "type": "boolean" },
+            "consumable": { "type": "boolean" },
+            "requiresAttunement": { "type": "boolean" },
+            "equipmentSlots": {
+              "type": "array",
+              "items": { "type": "string", "maxLength": 80 }
+            },
+            "requirements": {
+              "type": "array",
+              "items": { "$ref": "./common.schema.json#/$defs/formula" }
+            },
+            "weaponProfile": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["category", "damage", "damageTypeId", "scalingAbility"],
+              "properties": {
+                "category": { "enum": ["simple_melee", "simple_ranged", "martial_melee", "martial_ranged", "custom"] },
+                "damage": { "$ref": "./common.schema.json#/$defs/diceExpression" },
+                "damageTypeId": { "$ref": "./common.schema.json#/$defs/identifier" },
+                "scalingAbility": { "enum": ["str", "dex", "finesse", "custom"] },
+                "rangeNormalFeet": { "type": "integer", "minimum": 0 },
+                "rangeLongFeet": { "type": "integer", "minimum": 0 },
+                "propertyIds": {
+                  "type": "array",
+                  "items": { "$ref": "./common.schema.json#/$defs/identifier" }
+                },
+                "masteryId": { "$ref": "./common.schema.json#/$defs/identifier" }
+              }
+            },
+            "armorProfile": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["category", "baseAc", "addsDexterity"],
+              "properties": {
+                "category": { "enum": ["light", "medium", "heavy", "shield", "custom"] },
+                "baseAc": { "type": "integer", "minimum": 0 },
+                "addsDexterity": { "type": "boolean" },
+                "maxDexterityBonus": { "type": "integer", "minimum": 0 },
+                "strengthRequirement": { "type": "integer", "minimum": 1 },
+                "stealthDisadvantage": { "type": "boolean" }
+              }
+            },
+            "charges": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["maximumFormula", "recovery"],
+              "properties": {
+                "maximumFormula": { "$ref": "./common.schema.json#/$defs/formula" },
+                "recovery": { "enum": ["short_rest", "long_rest", "both", "dawn", "manual", "never"] }
+              }
+            },
+            "effects": {
+              "type": "array",
+              "items": { "$ref": "./effect.schema.json" }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

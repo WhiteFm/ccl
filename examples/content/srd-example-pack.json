@@ -1,0 +1,163 @@
+{
+  "manifest": {
+    "schemaVersion": "1.0.0",
+    "packId": "wsguild.srd-example",
+    "namespace": "wsguild.srd-example",
+    "version": "0.1.0",
+    "rulesetId": "dnd.srd52",
+    "kind": "official",
+    "author": "WSGuild",
+    "publisher": "WSGuild",
+    "defaultLocale": "en",
+    "locales": ["en", "ru"],
+    "dependencies": [],
+    "license": {
+      "id": "license.cc-by-4",
+      "name": "Creative Commons Attribution 4.0 International",
+      "url": "https://creativecommons.org/licenses/by/4.0/",
+      "attribution": "Example attribution placeholder. Production SRD packs must contain the exact required attribution."
+    },
+    "portability": {
+      "embedTechnicalData": true,
+      "embedLocalizedText": true,
+      "allowDerivativePacks": true,
+      "requiresEntitlement": false
+    },
+    "createdAt": "2026-08-09T00:00:00Z"
+  },
+  "entities": [
+    {
+      "id": "dnd.ability.dex",
+      "entityType": "reference",
+      "rulesetId": "dnd.srd52",
+      "sourceId": "source.srd52",
+      "sourceVersion": "5.2.1",
+      "licenseId": "license.cc-by-4",
+      "status": "draft",
+      "category": "ability",
+      "value": { "code": "dex" }
+    },
+    {
+      "id": "dnd.feature.alert-initiative",
+      "entityType": "feature",
+      "rulesetId": "dnd.srd52",
+      "sourceId": "source.srd52",
+      "sourceVersion": "5.2.1",
+      "licenseId": "license.cc-by-4",
+      "status": "draft",
+      "mode": "always_on",
+      "activation": "none",
+      "effects": [
+        {
+          "id": "dnd.effect.alert-initiative",
+          "target": "combat.initiative",
+          "operation": "add",
+          "value": {
+            "type": "formula",
+            "expression": "proficiency_bonus()"
+          },
+          "activation": "always_on",
+          "actionCost": "none",
+          "stacking": "non_stacking",
+          "stackingGroup": "initiative.proficiency",
+          "priority": 100,
+          "automationLevel": "full"
+        }
+      ],
+      "automationLevel": "full"
+    },
+    {
+      "id": "dnd.feat.alert-example",
+      "entityType": "feat",
+      "rulesetId": "dnd.srd52",
+      "sourceId": "source.srd52",
+      "sourceVersion": "5.2.1",
+      "licenseId": "license.cc-by-4",
+      "status": "draft",
+      "category": "origin",
+      "repeatable": false,
+      "featureIds": ["dnd.feature.alert-initiative"]
+    },
+    {
+      "id": "dnd.class.fighter-example",
+      "entityType": "class",
+      "rulesetId": "dnd.srd52",
+      "sourceId": "source.srd52",
+      "sourceVersion": "5.2.1",
+      "licenseId": "license.cc-by-4",
+      "status": "draft",
+      "hitDie": "d10",
+      "primaryAbilities": ["str", "dex"],
+      "multiclassPrerequisite": "ability_score(\"str\") >= 13 || ability_score(\"dex\") >= 13",
+      "startingHpFormula": "10 + ability_modifier(\"con\")",
+      "levelUpHpFormula": "6 + ability_modifier(\"con\")",
+      "startingProficiencies": ["dnd.proficiency.armor-all"],
+      "multiclassProficiencies": ["dnd.proficiency.armor-light-medium-shield"],
+      "casterProgression": "none",
+      "levels": [
+        { "level": 1, "featureIds": [] },
+        { "level": 2, "featureIds": [] },
+        { "level": 3, "featureIds": [] },
+        { "level": 4, "featureIds": [] },
+        { "level": 5, "featureIds": [] },
+        { "level": 6, "featureIds": [] },
+        { "level": 7, "featureIds": [] },
+        { "level": 8, "featureIds": [] },
+        { "level": 9, "featureIds": [] },
+        { "level": 10, "featureIds": [] },
+        { "level": 11, "featureIds": [] },
+        { "level": 12, "featureIds": [] },
+        { "level": 13, "featureIds": [] },
+        { "level": 14, "featureIds": [] },
+        { "level": 15, "featureIds": [] },
+        { "level": 16, "featureIds": [] },
+        { "level": 17, "featureIds": [] },
+        { "level": 18, "featureIds": [] },
+        { "level": 19, "featureIds": [] },
+        { "level": 20, "featureIds": [] }
+      ]
+    },
+    {
+      "id": "dnd.item.training-blade",
+      "entityType": "item",
+      "rulesetId": "dnd.srd52",
+      "sourceId": "source.srd52",
+      "sourceVersion": "5.2.1",
+      "licenseId": "license.cc-by-4",
+      "status": "draft",
+      "itemType": "weapon",
+      "weightLb": 3,
+      "costCp": 1500,
+      "stackable": false,
+      "consumable": false,
+      "requiresAttunement": false,
+      "equipmentSlots": ["hand.main", "hand.off"],
+      "weaponProfile": {
+        "category": "martial_melee",
+        "damage": "1d8",
+        "damageTypeId": "dnd.damage.slashing",
+        "scalingAbility": "str",
+        "propertyIds": []
+      },
+      "effects": []
+    }
+  ],
+  "localizations": {
+    "en": {
+      "dnd.ability.dex": { "name": "Dexterity" },
+      "dnd.feature.alert-initiative": { "name": "Initiative Training", "description": "Adds Proficiency Bonus to Initiative." },
+      "dnd.feat.alert-example": { "name": "Alert Example", "description": "Schema example only." },
+      "dnd.class.fighter-example": { "name": "Fighter Example", "description": "Minimal class schema example." },
+      "dnd.item.training-blade": { "name": "Training Blade", "description": "A structured weapon example." }
+    },
+    "ru": {
+      "dnd.ability.dex": { "name": "Ловкость" },
+      "dnd.feature.alert-initiative": { "name": "Подготовка инициативы", "description": "Добавляет бонус мастерства к инициативе." },
+      "dnd.feat.alert-example": { "name": "Пример бдительности", "description": "Только пример схемы." },
+      "dnd.class.fighter-example": { "name": "Пример воина", "description": "Минимальный пример класса." },
+      "dnd.item.training-blade": { "name": "Тренировочный клинок", "description": "Пример структурированного оружия." }
+    }
+  },
+  "assets": []
+}
+

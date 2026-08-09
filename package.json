@@ -1,0 +1,22 @@
+{
+  "name": "@wsguild/ccl2",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "check:schemas": "node scripts/check-schemas.mjs",
+    "test:engine": "node --test packages/rules-engine/test/*.test.ts",
+    "test": "node scripts/check-schemas.mjs && node --test packages/rules-engine/test/*.test.ts"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

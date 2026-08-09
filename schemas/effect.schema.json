@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.wsguild.net/ccl2/effect.schema.json",
+  "title": "CCL2 Atomic Effect",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "target", "operation", "value", "activation", "stacking", "priority"],
+  "properties": {
+    "id": { "$ref": "./common.schema.json#/$defs/identifier" },
+    "target": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 240,
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[A-Za-z0-9_*-]+)+$"
+    },
+    "operation": {
+      "enum": [
+        "add",
+        "subtract",
+        "set",
+        "set_minimum",
+        "set_maximum",
+        "multiply",
+        "replace_formula",
+        "grant",
+        "grant_proficiency",
+        "upgrade_proficiency",
+        "grant_advantage",
+        "grant_disadvantage",
+        "create_resource",
+        "restore_resource"
+      ]
+    },
+    "value": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "string", "maxLength": 240 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "expression"],
+          "properties": {
+            "type": { "const": "formula" },
+            "expression": { "$ref": "./common.schema.json#/$defs/formula" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "dice"],
+          "properties": {
+            "type": { "const": "dice" },
+            "dice": { "$ref": "./common.schema.json#/$defs/diceExpression" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "reference"],
+          "properties": {
+            "type": { "const": "reference" },
+            "reference": { "$ref": "./common.schema.json#/$defs/entityReference" }
+          }
+        }
+      ]
+    },
+    "activation": {
+      "enum": [
+        "always_on",
+        "manual_unlimited",
+        "limited_use",
+        "equipped",
+        "attuned",
+        "on_event"
+      ]
+    },
+    "actionCost": {
+      "enum": ["none", "action", "bonus_action", "reaction", "free_action", "special"]
+    },
+    "trigger": { "type": "string", "maxLength": 240 },
+    "conditions": {
+      "type": "array",
+      "items": { "$ref": "./common.schema.json#/$defs/formula" }
+    },
+    "stacking": {
+      "enum": ["sum", "maximum", "minimum", "replace", "non_stacking", "unique_by_source"]
+    },
+    "stackingGroup": { "type": "string", "maxLength": 120 },
+    "priority": { "type": "integer", "minimum": -10000, "maximum": 10000 },
+    "resourceId": { "$ref": "./common.schema.json#/$defs/identifier" },
+    "duration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["instant", "rounds", "minutes", "hours", "until_rest", "permanent"] },
+        "value": { "type": "integer", "minimum": 1 },
+        "restType": { "enum": ["short", "long"] }
+      }
+    },
+    "automationLevel": { "enum": ["full", "partial", "manual"] },
+    "notes": { "type": "string", "maxLength": 2000 }
+  }
+}
+

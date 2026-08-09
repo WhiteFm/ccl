@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0.0",
+  "characterId": "character-example-0001",
+  "ownerId": "user-example-0001",
+  "revision": 0,
+  "status": "active",
+  "identity": {
+    "name": "Schema Hero",
+    "description": "A minimal first-level character used by automated checks."
+  },
+  "profile": {
+    "alignmentId": "dnd.alignment.neutral-good",
+    "languageIds": ["dnd.language.common"]
+  },
+  "contentManifest": [
+    {
+      "packId": "wsguild.srd-example",
+      "version": "0.1.0",
+      "checksum": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "build": {
+    "speciesId": "dnd.species.human-example",
+    "backgroundId": "dnd.background.example",
+    "abilityGeneration": {
+      "method": "point_buy",
+      "budget": 27,
+      "scores": {
+        "str": 15,
+        "dex": 14,
+        "con": 13,
+        "int": 12,
+        "wis": 10,
+        "cha": 8
+      }
+    },
+    "backgroundAbilityBonuses": {
+      "str": 2,
+      "con": 1
+    },
+    "levelHistory": [
+      {
+        "characterLevel": 1,
+        "classId": "dnd.class.fighter-example",
+        "hpGain": 12
+      }
+    ],
+    "choices": []
+  },
+  "runtimeState": {
+    "xp": 0,
+    "hp": 12,
+    "temporaryHp": 0,
+    "deathSaves": {
+      "successes": 0,
+      "failures": 0
+    },
+    "resources": {},
+    "conditions": [],
+    "inventory": [],
+    "spellbook": {
+      "known": [],
+      "prepared": [],
+      "slotsUsed": {}
+    }
+  }
+}
+

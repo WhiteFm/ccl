@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.wsguild.net/ccl2/common.schema.json",
+  "title": "CCL2 Common Types",
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160,
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$"
+    },
+    "locale": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(?:-[A-Z]{2})?$"
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "isoDateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "abilityId": {
+      "enum": ["str", "dex", "con", "int", "wis", "cha"]
+    },
+    "abilityScores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["str", "dex", "con", "int", "wis", "cha"],
+      "properties": {
+        "str": { "type": "integer", "minimum": 1, "maximum": 30 },
+        "dex": { "type": "integer", "minimum": 1, "maximum": 30 },
+        "con": { "type": "integer", "minimum": 1, "maximum": 30 },
+        "int": { "type": "integer", "minimum": 1, "maximum": 30 },
+        "wis": { "type": "integer", "minimum": 1, "maximum": 30 },
+        "cha": { "type": "integer", "minimum": 1, "maximum": 30 }
+      }
+    },
+    "formula": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^[A-Za-z0-9_.,()\"' +*/%><=!&|-]+$"
+    },
+    "diceExpression": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*d(?:4|6|8|10|12|20|100)(?:[+-][0-9]+)?$"
+    },
+    "translationEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "shortName": { "type": "string", "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 100000 },
+        "rulesText": { "type": "string", "maxLength": 100000 },
+        "summary": { "type": "string", "maxLength": 1000 },
+        "aliases": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 240 }
+        }
+      }
+    },
+    "entityReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "packId": { "$ref": "#/$defs/identifier" },
+        "packVersion": { "$ref": "#/$defs/semver" }
+      }
+    },
+    "choiceOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "value"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "value": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "boolean" },
+            { "$ref": "#/$defs/entityReference" }
+          ]
+        },
+        "requires": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/formula" }
+        }
+      }
+    },
+    "choiceDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "minimum", "maximum", "options"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "minimum": { "type": "integer", "minimum": 0 },
+        "maximum": { "type": "integer", "minimum": 1 },
+        "allowDuplicates": { "type": "boolean", "default": false },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/choiceOption" }
+        }
+      }
+    },
+    "contentStatus": {
+      "enum": ["draft", "review", "published", "deprecated"]
+    }
+  }
+}

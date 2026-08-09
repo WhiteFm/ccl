@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "forge-project-example-0001",
+  "savedAt": "2026-08-09T00:00:00Z",
+  "draftPack": {
+    "manifest": {
+      "schemaVersion": "1.0.0",
+      "packId": "homebrew.example-pack",
+      "namespace": "homebrew.example-pack",
+      "version": "0.1.0",
+      "rulesetId": "dnd.srd52",
+      "kind": "homebrew",
+      "author": "Example Author",
+      "defaultLocale": "ru",
+      "locales": ["ru", "en"],
+      "dependencies": [
+        {
+          "packId": "wsguild.srd-example",
+          "versionRange": ">=0.1.0",
+          "optional": false
+        }
+      ],
+      "license": {
+        "id": "license.private-homebrew",
+        "name": "Private Homebrew",
+        "attribution": "Created by Example Author."
+      },
+      "portability": {
+        "embedTechnicalData": true,
+        "embedLocalizedText": true,
+        "allowDerivativePacks": false,
+        "requiresEntitlement": false
+      },
+      "createdAt": "2026-08-09T00:00:00Z"
+    },
+    "entities": [
+      {
+        "id": "homebrew.example-pack.feature.swift-start",
+        "entityType": "feature",
+        "rulesetId": "dnd.srd52",
+        "sourceId": "source.homebrew-example",
+        "sourceVersion": "0.1.0",
+        "licenseId": "license.private-homebrew",
+        "status": "draft",
+        "mode": "always_on",
+        "activation": "none",
+        "effects": [
+          {
+            "id": "homebrew.example-pack.effect.swift-start",
+            "target": "combat.initiative",
+            "operation": "add",
+            "value": 1,
+            "activation": "always_on",
+            "actionCost": "none",
+            "stacking": "sum",
+            "priority": 100,
+            "automationLevel": "full"
+          }
+        ],
+        "automationLevel": "full"
+      }
+    ],
+    "localizations": {
+      "ru": {
+        "homebrew.example-pack.feature.swift-start": {
+          "name": "Быстрый старт",
+          "description": "Вы получаете +1 к инициативе."
+        }
+      },
+      "en": {
+        "homebrew.example-pack.feature.swift-start": {
+          "name": "Swift Start",
+          "description": "You gain +1 to Initiative."
+        }
+      }
+    },
+    "assets": []
+  },
+  "editorState": {
+    "activeSection": "features",
+    "activeEntityId": "homebrew.example-pack.feature.swift-start",
+    "activeLocale": "ru",
+    "dirtyEntityIds": ["homebrew.example-pack.feature.swift-start"],
+    "validationAcknowledgements": []
+  },
+  "localAssetIndex": []
+}
+
